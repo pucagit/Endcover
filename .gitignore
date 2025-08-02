@@ -1,0 +1,4 @@
+*.class
+*.burp
+data/
+test.*
