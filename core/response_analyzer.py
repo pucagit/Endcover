@@ -11,7 +11,7 @@ class ResponseAnalyzer:
         low = responses.get("Low-Priv") or responses.get("High-Priv")
 
         if not unauth or not unauth.getResponse():
-            return False  # Cannot decide
+            return False 
 
         unauth_status = self._get_status_code(unauth)
         if unauth_status in [401, 403]:

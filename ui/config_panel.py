@@ -1,10 +1,11 @@
-from javax.swing import (
+from javax.swing import ( # type: ignore
     JPanel, JLabel, JCheckBox, JTextField, JButton, JTextArea,
-    JScrollPane, JTable, JSplitPane, BoxLayout, Box, JTabbedPane
+    JScrollPane, JTable, JSplitPane, BoxLayout, Box, JTabbedPane,
+    KeyStroke, InputMap, ActionMap, AbstractAction
 )
-from javax.swing.table import DefaultTableCellRenderer, DefaultTableModel
-from java.awt import BorderLayout, Dimension, FlowLayout, Color
-from java.awt.event import MouseAdapter
+from javax.swing.table import DefaultTableCellRenderer, DefaultTableModel # type: ignore
+from java.awt import BorderLayout, Dimension, FlowLayout, Color # type: ignore
+from java.awt.event import MouseAdapter, KeyEvent # type: ignore
 
 # Render colors for authentication/authorization columns
 class AuthCellRenderer(DefaultTableCellRenderer):
@@ -45,6 +46,32 @@ class ConfigPanel:
         self._row_data = []
 
         self._build_ui()
+
+    # Add Ctrl+R binding to send request to repeater
+    def _add_ctrl_r_binding(self, editor, label):
+        component = editor.getComponent()
+
+        input_map = component.getInputMap(JPanel.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+        action_map = component.getActionMap()
+
+        keystroke = KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK)
+        unique_action_key = "sendToRepeater_" + label  # make it unique per editor
+
+        input_map.put(keystroke, unique_action_key)
+
+        class SendToRepeaterAction(AbstractAction):
+            def actionPerformed(inner_self, e):
+                req_bytes = editor.getMessage()
+                if req_bytes:
+                    http_service = self._last_rr_map.get(label).getHttpService() if self._last_rr_map and label in self._last_rr_map else None
+                    if http_service:
+                        host = http_service.getHost()
+                        port = http_service.getPort()
+                        use_https = http_service.getProtocol().lower() == "https"
+                        self.callbacks.sendToRepeater(host, port, use_https, req_bytes, label + " Variant")
+
+        action_map.put(unique_action_key, SendToRepeaterAction())
+
 
     def _build_ui(self):
         self.main_panel = JPanel(BorderLayout())
@@ -122,6 +149,11 @@ class ConfigPanel:
         self.low_tab, self.low_req_editor, self.low_res_editor = create_editor_tab("Low-Priv")
         self.high_tab, self.high_req_editor, self.high_res_editor = create_editor_tab("High-Priv")
 
+        # Add Ctrl+R binding to each request editor
+        self._add_ctrl_r_binding(self.unauth_req_editor, "Unauthenticated")
+        self._add_ctrl_r_binding(self.low_req_editor, "Low-Priv")
+        self._add_ctrl_r_binding(self.high_req_editor, "High-Priv")
+
         self.variants_panel.add(self.unauth_tab)
         self.variants_panel.add(self.low_tab)
         self.variants_panel.add(self.high_tab)
@@ -150,6 +182,8 @@ class ConfigPanel:
         self.main_panel.add(self.split_panel, BorderLayout.CENTER)
 
     def show_request_response_variants(self, rr_map):
+        self._last_rr_map = rr_map
+
         for label, req_editor, res_editor in [
             ("Unauthenticated", self.unauth_req_editor, self.unauth_res_editor),
             ("Low-Priv", self.low_req_editor, self.low_res_editor),

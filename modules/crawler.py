@@ -1,5 +1,5 @@
 from threading import Lock
-from java.util.concurrent import Executors, TimeUnit
+from java.util.concurrent import Executors, TimeUnit # type: ignore
 import re
 
 STATIC_FILE_REGEX = re.compile(r'\.(js|css|png|jpg|svg|jpeg|gif|woff|map|bmp|ico)(?![a-z])[\?]*\S*$', re.IGNORECASE)

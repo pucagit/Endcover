@@ -1,7 +1,7 @@
 import sys
 from burp import IBurpExtender, ITab, IExtensionStateListener
-from java.awt.event import ActionListener
-from javax.swing import JFileChooser
+from java.awt.event import ActionListener # type: ignore
+from javax.swing import JFileChooser # type: ignore
 
 # Add your extension root directory if needed (adjust this path)
 sys.path.append("D:\\Tools\\Endcover")
