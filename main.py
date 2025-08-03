@@ -7,7 +7,7 @@ from javax.swing import JFileChooser
 sys.path.append("D:\\Tools\\Endcover")
 
 # Custom modules
-from ui.config import ConfigPanel
+from ui.config_panel import ConfigPanel
 from utils.logger import Logger
 from utils.csv_writer import CSVWriter
 from core.endpoint_analyzer import EndpointAnalyzer

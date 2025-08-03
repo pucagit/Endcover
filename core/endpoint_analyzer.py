@@ -51,10 +51,6 @@ class EndpointAnalysisTask(Thread):
                 protocol = url.getProtocol() == "https"
                 http_service = self.helpers.buildHttpService(url.getHost(), url.getPort(), protocol)
 
-                if method == "OPTIONS":
-                    self.config.add_log("Skipping OPTIONS request: {}".format(url.getPath()))
-                    continue
-
                 variants = self.request_builder.build_request_variants_from_raw(
                     raw_request, auth_header, high_cred, low_cred
                 )

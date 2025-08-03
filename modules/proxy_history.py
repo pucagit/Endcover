@@ -1,5 +1,8 @@
 from threading import Lock
 from java.util.concurrent import Executors, TimeUnit
+import re
+
+STATIC_FILE_REGEX = re.compile(r'\.(js|css|png|jpg|svg|jpeg|gif|woff|map|bmp|ico)(?![a-z])[\?]*\S*$', re.IGNORECASE)
 
 class ProxyHistoryAnalyzer:
     def __init__(self, callbacks, helpers, logger, config_panel):
@@ -38,11 +41,7 @@ class ProxyHistoryAnalyzer:
             url = request_info.getUrl()
             method = request_info.getMethod().upper()
 
-            if not self.callbacks.isInScope(url):
-                return
-            if method == "OPTIONS":
-                return
-            if not self._looks_like_api(url.getPath(), api_keywords):
+            if not self.callbacks.isInScope(url) or STATIC_FILE_REGEX.search(url.getPath()) or method == "OPTIONS" or not self._looks_like_api(url.getPath(), api_keywords):
                 return
 
             key = "{} {}".format(method, url.getPath())
