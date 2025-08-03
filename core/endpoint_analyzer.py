@@ -95,7 +95,8 @@ class EndpointAnalysisTask(Thread):
                     method,
                     param_str,
                     "Yes" if auth_required else "No",
-                    "Yes" if authz_enforced else "No"
+                    "Yes" if authz_enforced else "No",
+                    responses
                 )
 
                 self.config.add_log("Finished analysis: {} {}".format(method, url.getPath()))

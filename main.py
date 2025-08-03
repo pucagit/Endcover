@@ -35,8 +35,11 @@ class BurpExtender(IBurpExtender, ITab, IExtensionStateListener):
         # Wire Start button
         self._config_panel.start_button.addActionListener(StartAnalysisListener(self))
 
-        # CSV Write
+        # CSV Write button
         self._config_panel.save_button.addActionListener(SaveCsvListener(self))
+
+        # Clear Results button
+        self._config_panel.clear_button.addActionListener(ClearResultsListener(self))
 
         self.analyzer = EndpointAnalyzer(self._helpers, self._callbacks, self._config_panel, self.logger)
         self.logger.log("Endpoint Analyzer initialized.")
@@ -126,3 +129,14 @@ class SaveCsvListener(ActionListener):
             writer = CSVWriter(logger)
             writer.write_results(file_path, rows)
             config.add_log("Results saved to: " + file_path)
+
+# Clear Results Listener
+class ClearResultsListener(ActionListener):
+    def __init__(self, extender):
+        self.extender = extender
+
+    def actionPerformed(self, event):
+        config = self.extender._config_panel
+        config.clear_table()
+        config.clear_log()
+        config.add_log("Results cleared.")
