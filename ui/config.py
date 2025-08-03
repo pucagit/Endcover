@@ -6,6 +6,7 @@ from javax.swing.table import DefaultTableCellRenderer, DefaultTableModel
 from java.awt import BorderLayout, Dimension, FlowLayout, Color
 from java.awt.event import MouseAdapter
 
+# Render colors for authentication/authorization columns
 class AuthCellRenderer(DefaultTableCellRenderer):
     def getTableCellRendererComponent(self, table, value, isSelected, hasFocus, row, column):
         component = DefaultTableCellRenderer.getTableCellRendererComponent(
@@ -19,10 +20,12 @@ class AuthCellRenderer(DefaultTableCellRenderer):
             component.setBackground(Color.white)
         return component
 
+# Disable editing of the table
 class NonEditableTableModel(DefaultTableModel):
     def isCellEditable(self, row, column):
         return False
-    
+
+# Mouse listener to handle clicks on the table
 class TableClickListener(MouseAdapter):
     def __init__(self, panel):
         self.panel = panel
@@ -30,17 +33,17 @@ class TableClickListener(MouseAdapter):
     def mouseClicked(self, event):
         view_row = self.panel.table.getSelectedRow()
         if view_row >= 0:
-            model_row = self.panel.table.convertRowIndexToModel(view_row)  # get the correct row index even if sorting is applied
+            model_row = self.panel.table.convertRowIndexToModel(view_row)
             if model_row < len(self.panel._row_data):
                 rr_map = self.panel._row_data[model_row]
                 self.panel.show_request_response_variants(rr_map)
                 self.panel.tabbed_panel.setSelectedIndex(1)
 
-
 class ConfigPanel:
     def __init__(self, callbacks):
         self.callbacks = callbacks
         self._row_data = []
+
         self._build_ui()
 
     def _build_ui(self):
@@ -107,24 +110,21 @@ class ConfigPanel:
         self.variants_panel = JPanel()
         self.variants_panel.setLayout(BoxLayout(self.variants_panel, BoxLayout.Y_AXIS))
 
-        def create_rr_area(title):
-            label = JLabel(title)
-            area = JTextArea(6, 40)
-            area.setEditable(False)
-            scroll = JScrollPane(area)
-            panel = JPanel()
-            panel.setLayout(BoxLayout(panel, BoxLayout.Y_AXIS))
-            panel.add(label)
-            panel.add(scroll)
-            return panel, area
+        def create_editor_tab(title):
+            req_editor = self.callbacks.createMessageEditor(None, False)
+            res_editor = self.callbacks.createMessageEditor(None, False)
+            tabbed = JTabbedPane()
+            tabbed.addTab("{} Request".format(title), req_editor.getComponent())
+            tabbed.addTab("{} Response".format(title), res_editor.getComponent())
+            return tabbed, req_editor, res_editor
 
-        self.unauth_panel, self.unauth_area = create_rr_area("Unauthenticated Request/Response")
-        self.low_panel, self.low_area = create_rr_area("Low-Priv Request/Response")
-        self.high_panel, self.high_area = create_rr_area("High-Priv Request/Response")
+        self.unauth_tab, self.unauth_req_editor, self.unauth_res_editor = create_editor_tab("Unauthenticated")
+        self.low_tab, self.low_req_editor, self.low_res_editor = create_editor_tab("Low-Priv")
+        self.high_tab, self.high_req_editor, self.high_res_editor = create_editor_tab("High-Priv")
 
-        self.variants_panel.add(self.unauth_panel)
-        self.variants_panel.add(self.low_panel)
-        self.variants_panel.add(self.high_panel)
+        self.variants_panel.add(self.unauth_tab)
+        self.variants_panel.add(self.low_tab)
+        self.variants_panel.add(self.high_tab)
 
         self.tabbed_panel.addTab("Request Variants", self.variants_panel)
 
@@ -140,10 +140,8 @@ class ConfigPanel:
         self.table.getColumnModel().getColumn(4).setCellRenderer(AuthCellRenderer())
         self.table_scroll = JScrollPane(self.table)
 
-        # Click handler to populate variants
         self.table.addMouseListener(TableClickListener(self))
 
-        # Split UI
         self.split_panel = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
         self.split_panel.setLeftComponent(self.tabbed_panel)
         self.split_panel.setRightComponent(self.table_scroll)
@@ -152,19 +150,18 @@ class ConfigPanel:
         self.main_panel.add(self.split_panel, BorderLayout.CENTER)
 
     def show_request_response_variants(self, rr_map):
-        for label, area in [("Unauthenticated", self.unauth_area),
-                            ("Low-Priv", self.low_area),
-                            ("High-Priv", self.high_area)]:
+        for label, req_editor, res_editor in [
+            ("Unauthenticated", self.unauth_req_editor, self.unauth_res_editor),
+            ("Low-Priv", self.low_req_editor, self.low_res_editor),
+            ("High-Priv", self.high_req_editor, self.high_res_editor),
+        ]:
             rr = rr_map.get(label)
             if rr:
-                try:
-                    req = self.callbacks.getHelpers().bytesToString(rr.getRequest())
-                    res = self.callbacks.getHelpers().bytesToString(rr.getResponse())
-                    area.setText("=== Request ===\n" + req + "\n\n=== Response ===\n" + res)
-                except:
-                    area.setText("(Unable to decode request/response)")
+                req_editor.setMessage(rr.getRequest(), True)
+                res_editor.setMessage(rr.getResponse(), False)
             else:
-                area.setText("(Not available)")
+                req_editor.setMessage(None, True)
+                res_editor.setMessage(None, False)
 
     def get_main_panel(self): return self.main_panel
     def is_crawling_enabled(self): return self.crawl_checkbox.isSelected()
