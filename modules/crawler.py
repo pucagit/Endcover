@@ -15,7 +15,7 @@ class PassiveCrawler:
 
     def crawl(self):
         user_keyword = self.config.get_api_keyword()
-        api_keywords = list(self.default_api_keywords)
+        api_keywords = user_keyword.split() if user_keyword else self.default_api_keywords
         if user_keyword and user_keyword not in api_keywords:
             api_keywords.insert(0, user_keyword)
 
@@ -44,7 +44,7 @@ class PassiveCrawler:
             if not self.callbacks.isInScope(url) or STATIC_FILE_REGEX.search(url.getPath()) or method == "OPTIONS" or not self._looks_like_api(url.getPath(), api_keywords):
                 return
 
-            key = "{} {} {}".format(method, url.getPath(), url.getParameters())
+            key = "{} {}".format(method, url.getPath())
 
             # Use a lock to ensure thread-safe access to shared seen and results
             with lock:
