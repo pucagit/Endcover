@@ -31,7 +31,8 @@ class RequestBuilder:
 
         # 2. Low-Priv
         low_headers = list(stripped_headers)
-        low_headers.append("{}: {}".format(auth_header, low_value))
+        if auth_header:
+            low_headers.append("{}: {}".format(auth_header, low_value))
         variants.append((
             "Low-Priv",
             self.helpers.buildHttpMessage(low_headers, body)
@@ -39,7 +40,8 @@ class RequestBuilder:
 
         # 3. High-Priv
         high_headers = list(stripped_headers)
-        high_headers.append("{}: {}".format(auth_header, high_value))
+        if auth_header:
+            high_headers.append("{}: {}".format(auth_header, high_value))
         variants.append((
             "High-Priv",
             self.helpers.buildHttpMessage(high_headers, body)
