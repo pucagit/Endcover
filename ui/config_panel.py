@@ -92,17 +92,22 @@ class ConfigPanel:
             panel.add(field)
             return panel
 
+        def wrapped_text_area(text_area):
+            text_area.setLineWrap(True)
+            text_area.setWrapStyleWord(True)
+            return text_area
+
         self.crawl_checkbox = JCheckBox("Enable Crawling", True)
         self.proxy_checkbox = JCheckBox("Enable Proxy History Analysis", True)
 
         option_panel = JPanel()
-        option_panel.setLayout(BoxLayout(option_panel, BoxLayout.Y_AXIS))
+        option_panel.setLayout(FlowLayout(FlowLayout.CENTER))
         option_panel.add(self.crawl_checkbox)
         option_panel.add(self.proxy_checkbox)
 
-        self.auth_header_field = JTextArea(3, 20)
-        self.high_cred_field = JTextArea(3, 20)
-        self.low_cred_field = JTextArea(3, 20)
+        self.auth_header_field = wrapped_text_area(JTextArea(3, 20))
+        self.high_cred_field = wrapped_text_area(JTextArea(3, 20))
+        self.low_cred_field = wrapped_text_area(JTextArea(3, 20))
 
         self.auth_header_scroll = JScrollPane(self.auth_header_field)
         self.high_cred_scroll = JScrollPane(self.high_cred_field)
@@ -113,7 +118,7 @@ class ConfigPanel:
         self.start_button = JButton("Start API Discovery")
         self.save_button = JButton("Save Results to CSV")
         self.clear_button = JButton("Clear Results")
-        button_panel = JPanel(FlowLayout(FlowLayout.LEFT))
+        button_panel = JPanel(FlowLayout(FlowLayout.CENTER))
         button_panel.add(self.start_button)
         button_panel.add(self.save_button)
         button_panel.add(self.clear_button)
@@ -128,6 +133,11 @@ class ConfigPanel:
         self.control_panel.add(labeled_row("High-Priv Cred:", self.high_cred_scroll, 60))
         self.control_panel.add(labeled_row("Low-Priv Cred:", self.low_cred_scroll, 60))
         self.control_panel.add(labeled_row("API Keyword:", self.api_keyword_field, 24))
+
+        panel = JPanel(FlowLayout(FlowLayout.LEFT))
+        panel.add(JLabel("Allow multiple endpoints, each separated by a space character, e.g. api v1 keyword"))
+
+        self.control_panel.add(panel)
         self.control_panel.add(button_panel)
         self.control_panel.add(self.log_scroll)
 

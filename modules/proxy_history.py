@@ -15,7 +15,7 @@ class ProxyHistoryAnalyzer:
 
     def extract_endpoints(self):
         user_keyword = self.config.get_api_keyword()
-        api_keywords = list(self.default_api_keywords)
+        api_keywords = user_keyword.split() if user_keyword else self.default_api_keywords
         if user_keyword and user_keyword not in api_keywords:
             api_keywords.insert(0, user_keyword)
 
