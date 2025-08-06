@@ -32,7 +32,7 @@ class PassiveCrawler:
         executor.shutdown()
         executor.awaitTermination(60, TimeUnit.SECONDS)
 
-        self.logger.log("Crawled and found {} in-scope API endpoints.".format(len(results)))
+        self.config.add_log("Crawled and found {} in-scope API endpoints.".format(len(results)))
         return results
 
     def _analyze_entry(self, rr, api_keywords, seen, results, lock):
@@ -42,6 +42,7 @@ class PassiveCrawler:
             method = request_info.getMethod().upper()
 
             if not self.callbacks.isInScope(url) or STATIC_FILE_REGEX.search(url.getPath()) or method == "OPTIONS" or not self._looks_like_api(url.getPath(), api_keywords):
+                # self.config.add_log("Skipping {} {}: not in scope or static file".format(method, url.getPath()))
                 return
 
             key = "{} {}".format(method, url.getPath())
@@ -54,7 +55,7 @@ class PassiveCrawler:
                 results.append(rr)
 
         except Exception as e:
-            self.logger.error("Error parsing site map entry: {}".format(e))
+            self.config.add_log("Error parsing site map entry: {}".format(e))
 
     def _looks_like_api(self, path, keywords):
         path = path.lower()

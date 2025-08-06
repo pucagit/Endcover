@@ -6,6 +6,8 @@ from javax.swing import ( # type: ignore
 from javax.swing.table import DefaultTableCellRenderer, DefaultTableModel # type: ignore
 from java.awt import BorderLayout, Dimension, FlowLayout, Color # type: ignore
 from java.awt.event import MouseAdapter, KeyEvent # type: ignore
+from java.lang import String # type: ignore
+from java.lang import Integer # type: ignore
 
 # Render colors for authentication/authorization columns
 class AuthCellRenderer(DefaultTableCellRenderer):
@@ -25,6 +27,12 @@ class AuthCellRenderer(DefaultTableCellRenderer):
 class NonEditableTableModel(DefaultTableModel):
     def isCellEditable(self, row, column):
         return False
+    
+    def getColumnClass(self, columnIndex):
+        # Make the first column (Order) an integer for proper numeric sorting
+        if columnIndex == 0:  
+            return Integer   
+        return String
 
 # Mouse listener to handle clicks on the table
 class TableClickListener(MouseAdapter):
@@ -172,14 +180,21 @@ class ConfigPanel:
 
         # Table (Right side)
         self.table_columns = [
-            "Endpoint", "HTTP Method", "Parameters",
+            "#", "Endpoint", "HTTP Method", "Parameters",
             "Authentication Required", "Authorization Enforced"
         ]
         self.table_model = NonEditableTableModel(self.table_columns, 0)
         self.table = JTable(self.table_model)
         self.table.setAutoCreateRowSorter(True)
-        self.table.getColumnModel().getColumn(3).setCellRenderer(AuthCellRenderer())
         self.table.getColumnModel().getColumn(4).setCellRenderer(AuthCellRenderer())
+        self.table.getColumnModel().getColumn(5).setCellRenderer(AuthCellRenderer())
+
+        # Adjust initial column widths
+        col_model = self.table.getColumnModel()
+        col_model.getColumn(0).setPreferredWidth(10)   # Order (#) column
+        col_model.getColumn(1).setPreferredWidth(350)  # Endpoint column
+        col_model.getColumn(2).setPreferredWidth(70)   # HTTP Method column
+
         self.table_scroll = JScrollPane(self.table)
 
         self.table.addMouseListener(TableClickListener(self))
@@ -216,8 +231,8 @@ class ConfigPanel:
     def get_api_keyword(self): return self.api_keyword_field.getText().strip().lower()
     def add_log(self, msg): self.log_area.append(msg + "\n")
 
-    def add_endpoint_result(self, endpoint, method, params, auth_required, authz_enforced, rr_map):
-        row = [endpoint, method, params, auth_required, authz_enforced]
+    def add_endpoint_result(self, idx, endpoint, method, params, auth_required, authz_enforced, rr_map):
+        row = [idx, endpoint, method, params, auth_required, authz_enforced]
         self.table_model.addRow(row)
         self._row_data.append(rr_map)
 

@@ -41,8 +41,10 @@ class EndpointAnalysisTask(Thread):
         auth_header = self.config.get_auth_header_name()
         high_cred = self.config.get_high_cred()
         low_cred = self.config.get_low_cred()
+        idx = 0
 
         for rr in self.request_responses:
+            idx += 1
             try:
                 request_info = self.helpers.analyzeRequest(rr)
                 url = request_info.getUrl()
@@ -87,6 +89,7 @@ class EndpointAnalysisTask(Thread):
                 param_str = ", ".join(params) if params else "-"
 
                 self.config.add_endpoint_result(
+                    idx,
                     url.getPath(),
                     method,
                     param_str,
@@ -123,12 +126,12 @@ class RequestSender(Thread):
             resp = self.callbacks.makeHttpRequest(self.http_service, self.request_bytes)
 
             if resp is None or resp.getResponse() is None:
-                self.config.add_log("No response for {} request to {}".format(self.label, self.path))
+                # self.config.add_log("No response for {} request to {}".format(self.label, self.path))
                 return
 
             self.responses[self.label] = resp
             self.logger.log_request_response(resp)
-            self.config.add_log("Got response for {} request to {}".format(self.label, self.path))
+            # self.config.add_log("Got response for {} request to {}".format(self.label, self.path))
 
         except Exception as e:
             self.config.add_log("Error sending {} request to {}: {}".format(self.label, self.path, e))
