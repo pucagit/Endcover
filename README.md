@@ -42,15 +42,15 @@ This extension has proven especially valuable when conducting penetration tests 
 ---
 
 ## 📦 Installation
-0. Ensure **Jython** is configured in Burp Suite 
+1. Ensure **Jython** is configured in Burp Suite 
 ```
 Extensions → Extensions Settings → Python Environment -> Choose the path where your jython-standalone.jar is located
 ```
-1. Clone this repo from github: 
+2. Clone this repo from github: 
 ```
 git clone https://github.com/pucagit/Endcover.git
 ```
-1. Load it into Burp Suite via:
+3. Load it into Burp Suite via:
 ```
 Extensions → Installed → Add → Extension Type: Python → Select main.py
 ```
@@ -58,17 +58,17 @@ Extensions → Installed → Add → Extension Type: Python → Select main.py
 ---
 
 ## 🚀 Usage
-0. Testing around with the target or use Burp's Crawler to discover endpoints
-1. Open the **"Endcover"** tab in Burp Suite.
-2. Configure:
+1. Testing around with the target or use Burp's Crawler to discover endpoints
+2. Open the **"Endcover"** tab in Burp Suite.
+3. Configure:
 - Authentication header (e.g., `Authorization` or `Cookie`)
 - High-privilege & low-privilege credential values
 - API keyword(s) for discovery each separated by a space character
-3. Choose whether to:
+4. Choose whether to:
 - Crawl target scope
 - Analyze proxy history
-4. Click **Start API Discovery**.
-5. Review results in the table or export to CSV.
+5. Click **Start API Discovery**.
+6. Review results in the table or export to CSV.
 
 ---
 
